@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+DRIVER_FILENAME=${DIB_DRIVER_URL##*/}
+
+sudo wget -O /opt/$DRIVER_FILENAME $DIB_DRIVER_URL
+# install -m 0755 -o root -g root $(dirname $0)/../driver/nvidia-linux-grid-510_510.47.03_amd64.deb /opt/
+sudo apt install /opt/$DRIVER_FILENAME
+sudo sed -i '/FeatureType=/c\FeatureType=4' /etc/nvidia/gridd.conf
+sudo sed -i '/EnableUI=/c\EnableUI=FALSE' /etc/nvidia/gridd.conf
+sudo mkdir /etc/nvidia/ClientConfigToken/
+# It might be better to download this token during a build
+install -m 0644 -o root -g root $(dirname $0)/../driver/$DIB_CLIENT_TOKEN /etc/nvidia/ClientConfigToken/
+echo "188.241.198.110 host-188-241-198-110.openstacklocal" >> /etc/hosts
+echo "188.241.198.81 host-188-241-198-81.openstacklocal" >> /etc/hosts
