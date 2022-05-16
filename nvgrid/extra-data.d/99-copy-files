@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# If a path to the token file is defined, then we should copy it to the image
+if [ -z "${DIB_NVGRID_CLIENT_TOKEN:-}" ]; then
+    echo "Var DIB_NVGRID_CLIENT_TOKEN is not defined. Skipping..."
+else
+    # copy the NVidia client token cloudimg
+    sudo mkdir -p $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
+    sudo cp -L -f $DIB_NVGRID_CLIENT_TOKEN $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
+fi
+
+if [ -z "${DIB_NVGRID_DRIVER_FILE:-}" ]; then
+    echo "Var DIB_NVGRID_DRIVER_FILE is not defined. Skipping..."
+else
+    sudo cp -L -f $DIB_NVGRID_DRIVER_FILE $TMP_MOUNT_PATH/opt/
+fi
