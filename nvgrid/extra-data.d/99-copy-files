@@ -1,6 +1,54 @@
 #!/bin/bash
 
+if [ ${DIB_DEBUG_TRACE:-1} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
 sudo mkdir -p $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
+
+if [ -n "${DIB_NVGRID_CLIENT_TOKEN_URL:-}" ]; then
+  TOKEN_FILENAME=${DIB_NVGRID_CLIENT_TOKEN_URL##*/}
+  $TMP_HOOKS_PATH/bin/cache-url $DIB_NVGRID_CLIENT_TOKEN_URL \
+    $DIB_IMAGE_CACHE/$TOKEN_FILENAME
+  TOKEN_SHA=$(sha256sum $DIB_IMAGE_CACHE/$TOKEN_FILENAME | cut -d " " -f1)
+fi
+if [ -n "${DIB_NVGRID_DRIVER_URL:-}" ]; then
+  DRIVER_FILENAME=${DIB_NVGRID_DRIVER_URL##*/}
+  $TMP_HOOKS_PATH/bin/cache-url $DIB_NVGRID_DRIVER_URL \
+    $DIB_IMAGE_CACHE/$DRIVER_FILENAME
+  DRIVER_SHA=$(sha256sum $DIB_IMAGE_CACHE/$DRIVER_FILENAME | cut -d " " -f1)
+fi
+
+# Checksum verify. Due to security concerns sha256 sum should not be
+# downloaded from URL and file needs to be provided locally.
+
+if [ -n "${DIB_NVGRID_SHA:-}" ]; then
+  echo "SHA256 summ file provided. Doing verification"
+    if [ -n "${DIB_NVGRID_CLIENT_TOKEN_URL:-}" ]; then
+    if ! grep -q $TOKEN_SHA $DIB_NVGRID_SHA; then
+      echo "Token verification failed. Forcing re-download..."
+      $TMP_HOOKS_PATH/bin/cache-url -f $DIB_NVGRID_CLIENT_TOKEN_URL \
+        $DIB_IMAGE_CACHE/$TOKEN_FILENAME
+      TOKEN_SHA = $(sha256sum $DIB_IMAGE_CACHE/$TOKEN_FILENAME | cut -d " " -f1)
+      grep -q $TOKEN_SHA $DIB_NVGRID_SHA
+    else
+      echo "Token verification: OK"
+    fi
+  fi
+  if [ -n "${DIB_NVGRID_DRIVER_URL:-}" ]; then
+    if ! grep -q $DRIVER_SHA $DIB_NVGRID_SHA; then
+      echo "Driver verification failed. Forcing re-download..."
+      $TMP_HOOKS_PATH/bin/cache-url $DIB_NVGRID_DRIVER_URL \
+        $DIB_IMAGE_CACHE/$DRIVER_FILENAME
+      DRIVER_SHA = $(sha256sum $DIB_IMAGE_CACHE/$DRIVER_FILENAME | cut -d " " -f1)
+      grep -q $DRIVER_SHA $DIB_NVGRID_SHA
+    else
+      echo "Driver verification: OK"
+    fi
+  fi
+fi
 
 # Copy Token to VM either from URL or from File
 if [ -z "${DIB_NVGRID_CLIENT_TOKEN_URL:-}" ]; then
@@ -11,13 +59,12 @@ if [ -z "${DIB_NVGRID_CLIENT_TOKEN_URL:-}" ]; then
     exit 1
   else
     # Token File Defined
-    echo "Copying token file"
+    echo "Using local token file"
     sudo cp -L -f $DIB_NVGRID_CLIENT_TOKEN $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
   fi
 else
-  echo "Downloading token from URL"
-  TOKEN_FILENAME=${DIB_NVGRID_CLIENT_TOKEN_URL##*/}
-  sudo wget -O $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/$TOKEN_FILENAME $DIB_NVGRID_CLIENT_TOKEN_URL
+  # File was cached from download. So just copy it.
+  sudo cp -L -f $DIB_IMAGE_CACHE/$TOKEN_FILENAME $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
 fi
 
 # Copy driver to VM either from URL or from File
@@ -28,11 +75,10 @@ if [ -z "${DIB_NVGRID_DRIVER_URL:-}" ]; then
     echo "Please set DIB_NVGRID_DRIVER_FILE to copy driver"
     exit 1
   else
-    echo "Copying driver file"
+    echo "Using local driver file"
     sudo cp -L -f $DIB_NVGRID_DRIVER_FILE $TMP_MOUNT_PATH/opt/
   fi
 else
-  echo "Downloading driver from URL"
-  DRIVER_FILENAME=${DIB_NVGRID_DRIVER_URL##*/}
-  sudo wget -O $TMP_MOUNT_PATH/opt/$DRIVER_FILENAME $DIB_NVGRID_DRIVER_URL
+  # File was cached from download. So just copy it.
+  sudo cp -L -f $DIB_IMAGE_CACHE/$DRIVER_FILENAME $TMP_MOUNT_PATH/opt/
 fi

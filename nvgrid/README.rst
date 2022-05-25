@@ -23,3 +23,8 @@ DIB_NVGRID_HOSTS_FILE which defines path to the text file. It's content will be
 added to /etc/hosts on the image as is. The second one is a env VAR DIB_HOSTS_ADD
 It's syntax is "ip/hostname:ip/hostname" it will be parsed and added to the
 /etc/hosts file
+
+There is a way to verify downloaded images. Define DIB_NVGRID_SHA variable and
+set it to the path with sha256sum file for downloaded from URL files. It can be
+either a driver or token or both of them. Verification will be passed only for
+files downloaded from URL.
