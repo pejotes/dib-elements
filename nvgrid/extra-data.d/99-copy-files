@@ -1,16 +1,38 @@
 #!/bin/bash
 
-# If a path to the token file is defined, then we should copy it to the image
-if [ -z "${DIB_NVGRID_CLIENT_TOKEN:-}" ]; then
-    echo "Var DIB_NVGRID_CLIENT_TOKEN is not defined. Skipping..."
-else
-    # copy the NVidia client token cloudimg
-    sudo mkdir -p $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
+sudo mkdir -p $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
+
+# Copy Token to VM either from URL or from File
+if [ -z "${DIB_NVGRID_CLIENT_TOKEN_URL:-}" ]; then
+  if [ -z "${DIB_NVGRID_CLIENT_TOKEN:-}" ]; then
+    echo "Either token url or token filename must be defined"
+    echo "Please set DIB_NVGRID_CLIENT_TOKEN_URL to download from url"
+    echo "Please set DIB_NVGRID_CLIENT_TOKEN to copy from local file"
+    exit 1
+  else
+    # Token File Defined
+    echo "Copying token file"
     sudo cp -L -f $DIB_NVGRID_CLIENT_TOKEN $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
+  fi
+else
+  echo "Downloading token from URL"
+  TOKEN_FILENAME=${DIB_NVGRID_CLIENT_TOKEN_URL##*/}
+  sudo wget -O $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/$TOKEN_FILENAME $DIB_NVGRID_CLIENT_TOKEN_URL
 fi
 
-if [ -z "${DIB_NVGRID_DRIVER_FILE:-}" ]; then
-    echo "Var DIB_NVGRID_DRIVER_FILE is not defined. Skipping..."
-else
+# Copy driver to VM either from URL or from File
+if [ -z "${DIB_NVGRID_DRIVER_URL:-}" ]; then
+  if [ -z "${DIB_NVGRID_DRIVER_FILE:-}" ]; then
+    echo "Either driver url or driver filename must be defined"
+    echo "Please set DIB_NVGRID_DRIVER_URL to download driver"
+    echo "Please set DIB_NVGRID_DRIVER_FILE to copy driver"
+    exit 1
+  else
+    echo "Copying driver file"
     sudo cp -L -f $DIB_NVGRID_DRIVER_FILE $TMP_MOUNT_PATH/opt/
+  fi
+else
+  echo "Downloading driver from URL"
+  DRIVER_FILENAME=${DIB_NVGRID_DRIVER_URL##*/}
+  sudo wget -O $TMP_MOUNT_PATH/opt/$DRIVER_FILENAME $DIB_NVGRID_DRIVER_URL
 fi

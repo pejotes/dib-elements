@@ -13,9 +13,10 @@ url will be used as a filename idenifier.
 DIB_NVGRID_DRIVER_FILE - defines path on the local filesystem to the driver file
 which will be copied to the image.
 
-In order to put a license token, use variable DIB_NVGRID_CLIENT_TOKEN. Set it to
-the file path on the local filesystem and it will be copied to 
-/etc/nvidia/ClientConfigToken/ inside the image.
+In order to put a license token, use variable DIB_NVGRID_CLIENT_TOKEN or
+DIB_NVGRID_CLIENT_TOKEN_URL. Set it to the file path on the local filesystem or
+to remote URL and it will be copied to /etc/nvidia/ClientConfigToken/ inside
+the image.
 
 To override hosts records we have two options. The first one is to set
 DIB_NVGRID_HOSTS_FILE which defines path to the text file. It's content will be

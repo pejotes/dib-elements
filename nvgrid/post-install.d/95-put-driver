@@ -8,22 +8,19 @@ set -o pipefail
 
 grid_config()
 {
-    sudo sed -i '/FeatureType=/c\FeatureType=4' /etc/nvidia/gridd.conf
-    sudo sed -i '/EnableUI=/c\EnableUI=FALSE' /etc/nvidia/gridd.conf
+  cat <<EOF > /etc/nvidia/gridd.conf
+FeatureType=4
+EnableUI=FALSE
+EOF
 }
 
+# if we got here than the driver file was copied and either DRIVER_URL or
+# DRIVER_FILE was defined. So just getting a filename
 if [ -n "${DIB_NVGRID_DRIVER_URL:-}" ]; then
     DRIVER_FILENAME=${DIB_NVGRID_DRIVER_URL##*/}
-    sudo wget -O /opt/$DRIVER_FILENAME $DIB_DRIVER_URL
-    sudo apt install /opt/$DRIVER_FILENAME
-    grid_config
 elif [ -n "${DIB_NVGRID_DRIVER_FILE:-}" ]; then
     DRIVER_FILENAME=${DIB_NVGRID_DRIVER_FILE##*/}
-    sudo apt install /opt/$DRIVER_FILENAME
-    grid_config
-else
-    echo "Either driver url or driver filename must be defined"
-    echo "Please set DIB_NVGRID_DRIVER_URL to download driver"
-    echo "Please set DIB_NVGRID_DRIVER_FILE to copy driver"
-    exit 1
 fi
+# And running its installation
+sudo apt install /opt/$DRIVER_FILENAME
+grid_config
