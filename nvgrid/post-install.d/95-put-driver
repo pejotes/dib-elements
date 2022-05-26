@@ -8,7 +8,7 @@ set -o pipefail
 
 grid_config()
 {
-  cat <<EOF > /etc/nvidia/gridd.conf
+    cat <<EOF > /etc/nvidia/gridd.conf
 FeatureType=4
 EnableUI=FALSE
 EOF
