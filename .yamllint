@@ -1,0 +1,15 @@
+---
+yaml-files:
+  - '*.yaml'
+
+rules:
+  indentation:
+    spaces: consistent
+    indent-sequences: true
+    check-multi-line-strings: true
+  braces: enable
+  brackets: enable
+  colons: enable
+  commas: enable
+  document-end: disable
+  document-start: disable

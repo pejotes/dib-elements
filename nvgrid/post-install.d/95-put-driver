@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+grid_config()
+{
+    cat <<EOF > /etc/nvidia/gridd.conf
+FeatureType=4
+EnableUI=FALSE
+EOF
+}
+
+# if we got here than the driver file was copied and either DRIVER_URL or
+# DRIVER_FILE was defined. So just getting a filename
+if [ -n "${DIB_NVGRID_DRIVER_URL:-}" ]; then
+    DRIVER_FILENAME=${DIB_NVGRID_DRIVER_URL##*/}
+elif [ -n "${DIB_NVGRID_DRIVER_FILE:-}" ]; then
+    DRIVER_FILENAME=${DIB_NVGRID_DRIVER_FILE##*/}
+fi
+# And running its installation
+sudo apt install /opt/$DRIVER_FILENAME
+grid_config
