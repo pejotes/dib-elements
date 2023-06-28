@@ -18,6 +18,10 @@ DIB_NVGRID_CLIENT_TOKEN_URL. Set it to the file path on the local filesystem or
 to remote URL and it will be copied to /etc/nvidia/ClientConfigToken/ inside
 the image.
 
+DIB_NVGRID_CLIENT_TOKEN_MODE - defines mode that will be set for client token
+file inside the image. Some versions of GRID require it to be readable for
+all users.
+
 To override hosts records we have two options. The first one is to set
 DIB_NVGRID_HOSTS_FILE which defines path to the text file. It's content will be
 added to /etc/hosts on the image as is. The second one is a env VAR DIB_HOSTS_ADD

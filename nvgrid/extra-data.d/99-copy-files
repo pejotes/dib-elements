@@ -71,6 +71,9 @@ else
         $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/
 fi
 
+# Change token permissions if needed
+sudo chmod ${DIB_NVGRID_CLIENT_TOKEN_MODE:-'0400'} $TMP_MOUNT_PATH/etc/nvidia/ClientConfigToken/*
+
 # Copy driver to VM either from URL or from File
 if [ -z "${DIB_NVGRID_DRIVER_URL:-}" ]; then
     if [ -z "${DIB_NVGRID_DRIVER_FILE:-}" ]; then
