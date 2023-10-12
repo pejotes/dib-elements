@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mkdir -p /run/systemd/resolve
+echo "Saving /etc/resolve.conf to mimic systemd-resolved until in chroot"
+cat /etc/resolv.conf > /run/systemd/resolve/stub-resolv.conf
