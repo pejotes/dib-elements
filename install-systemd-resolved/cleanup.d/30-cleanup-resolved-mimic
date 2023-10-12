@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm ${TARGET_ROOT}/run/systemd/resolve/stub-resolv.conf
+rmdir ${TARGET_ROOT}/run/systemd/resolve/
