@@ -1,0 +1,3 @@
+if [[ ${DIB_RELEASE} -eq 39 ]]; then
+    dnf versionlock delete audit
+fi

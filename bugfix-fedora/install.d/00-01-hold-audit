@@ -1,0 +1,4 @@
+if [[ ${DIB_RELEASE} -eq 39 ]]; then
+    install-packages python3-dnf-plugin-versionlock
+    dnf versionlock add audit
+fi
