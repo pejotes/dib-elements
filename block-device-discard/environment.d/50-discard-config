@@ -1,0 +1,4 @@
+export DIB_BLOCK_DEVICE_DISCARD=true
+export DIB_BLOCK_DEVICE_DISCARD_DEFAULT=true
+export DIB_FSTAB_MOUNT_OPTIONS="defaults,discard"
+export DIB_BLOCK_DEVICE_MOUNT_OPTIONS="defaults,discard"

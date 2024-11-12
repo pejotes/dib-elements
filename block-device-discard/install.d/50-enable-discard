@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+# Enable discard in kernel cmdline
+if [ -f /etc/default/grub ]; then
+    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="rootflags=discard /' /etc/default/grub
+    update-grub || grub2-mkconfig -o /boot/grub2/grub.cfg
+fi
+
+# Ensure discard is enabled in fstab
+sed -i 's/defaults/defaults,discard/' /etc/fstab
+
+# Configure udev rules for additional block devices
+cat > /etc/udev/rules.d/60-scheduler-discard.rules << 'UDEVRULES'
+ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="vd[a-z]*", ATTR{queue/discard_max_bytes}!="0", ATTR{queue/discard_max_bytes}="2147483648"
+ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]*", ATTR{queue/discard_max_bytes}!="0", ATTR{queue/discard_max_bytes}="2147483648"
+UDEVRULES
+
+# Enable periodic trim service if available
+if [ -f /usr/lib/systemd/system/fstrim.timer ]; then
+    systemctl enable fstrim.timer
+fi
