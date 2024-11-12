@@ -1,2 +1,4 @@
 block-device-efi
 operating-system
+package-installs
+bootloader

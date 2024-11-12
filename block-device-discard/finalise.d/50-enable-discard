@@ -12,8 +12,10 @@ if [ -f /etc/default/grub ]; then
     update-grub || grub2-mkconfig -o /boot/grub2/grub.cfg
 fi
 
-# Ensure discard is enabled in fstab
-sed -i 's/defaults/defaults,discard/' /etc/fstab
+if [ -f /etc/fstab ]; then
+    # Only add discard if it's not already present
+    sed -i '/defaults/ {/discard/! s/defaults/defaults,discard/}' /etc/fstab
+fi
 
 # Configure udev rules for additional block devices
 cat > /etc/udev/rules.d/60-scheduler-discard.rules << 'UDEVRULES'
